@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Button } from './components/ui/Button'
-import { Sparkles, Box, MousePointer2, Github, MessageSquare, ChevronDown } from 'lucide-react'
+import { Badge } from "./components/ui/Badge"
+import { Sparkles, Box, MousePointer2, Github, MessageSquare, ChevronDown, Search } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,8 @@ import {
   SelectValue,
 } from "./components/ui/Select"
 import { MultiSelect, type Option } from "./components/ui/MultiSelect"
+import { SelectAsync } from "./components/ui/SelectAsync"
+import { MultiSelectAsync } from "./components/ui/MultiSelectAsync"
 
 const HUMAN_NAMES = [
   "Alexander Thompson",
@@ -55,6 +58,20 @@ function App() {
     HUMAN_OBJECTS[0],
     HUMAN_OBJECTS[2]
   ])
+
+  const [selectedAsync, setSelectedAsync] = React.useState<Option | null>(null)
+  const [selectedMultiAsync, setSelectedMultiAsync] = React.useState<Option[]>([])
+
+  const loadOptionsAsync = async (query: string): Promise<Option[]> => {
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 800))
+    
+    if (!query) return HUMAN_OBJECTS
+    
+    return HUMAN_OBJECTS.filter((person) =>
+      person.name.toLowerCase().includes(query.toLowerCase())
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background selection:bg-primary/20 selection:text-primary">
@@ -198,6 +215,61 @@ function App() {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass group hover:border-emerald-200 transition-all duration-300">
+            <CardHeader>
+              <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform mb-4 shadow-sm">
+                <Search className="w-6 h-6" />
+              </div>
+              <CardTitle className="font-outfit text-2xl text-slate-900">Async Select</CardTitle>
+              <CardDescription className="text-slate-500">Searchable dropdown that loads data asynchronously with debouncing.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="pt-2">
+                <SelectAsync
+                  value={selectedAsync}
+                  onChange={setSelectedAsync}
+                  loadOptions={loadOptionsAsync}
+                  placeholder="Search and select user..."
+                />
+                <div className="mt-6 p-4 rounded-2xl bg-slate-50 border border-slate-200/60 shadow-inner">
+                  <p className="text-[11px] text-slate-400 uppercase font-bold tracking-widest mb-3 border-b border-slate-200/60 pb-2">Selected Value</p>
+                  <pre className="text-[11px] text-slate-700 font-mono">
+                    {selectedAsync ? JSON.stringify(selectedAsync, null, 2) : "No user selected"}
+                  </pre>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass group hover:border-blue-200 transition-all duration-300">
+            <CardHeader>
+              <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform mb-4 shadow-sm">
+                <Search className="w-6 h-6" />
+              </div>
+              <CardTitle className="font-outfit text-2xl text-slate-900">Multi Async Select</CardTitle>
+              <CardDescription className="text-slate-500">Search and select multiple items asynchronously with chip UI.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="pt-2">
+                <MultiSelectAsync
+                  value={selectedMultiAsync}
+                  onChange={setSelectedMultiAsync}
+                  loadOptions={loadOptionsAsync}
+                  placeholder="Search and select members..."
+                />
+                <div className="mt-6 p-4 rounded-2xl bg-slate-50 border border-slate-200/60 shadow-inner">
+                  <p className="text-[11px] text-slate-400 uppercase font-bold tracking-widest mb-3 border-b border-slate-200/60 pb-2">Selected Count</p>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-white/50">{selectedMultiAsync.length} selected</Badge>
+                  </div>
+                  <pre className="mt-3 text-[11px] text-slate-700 font-mono overflow-auto max-h-32 custom-scrollbar">
+                    {selectedMultiAsync.length > 0 ? JSON.stringify(selectedMultiAsync, null, 2) : "No items selected"}
+                  </pre>
+                </div>
               </div>
             </CardContent>
           </Card>
